@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<robot name="dobot" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:property name="base_side" value="0.158" />
+    <xacro:property name="base_height" value="0.056" />
+
+    <xacro:property name="link1_side" value="0.079" />
+    <xacro:property name="link1_length" value="0.082" />
+
+    <xacro:property name="link2_side" value="0.040" />
+    <xacro:property name="link2_length" value="0.135" />
+
+    <xacro:property name="link3_side" value="0.040" />
+    <xacro:property name="link3_length" value="0.145" />
+
+    <xacro:property name="link_mimic_side" value="0.040" />
+    <xacro:property name="link_mimic_length" value="0.060" />
+
+    <xacro:property name="link4_side" value="0.020" />
+    <xacro:property name="link4_length" value="0.050" />
+
+    <xacro:property name="linkee_side" value="0.020" />
+    <xacro:property name="linkee_length" value="0.020" />
+
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 ${base_height/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${base_side} ${base_side} ${base_height}" />
+            </geometry>
+            <material name="White">
+                <color rgba="1.0 1.0 1.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <link name="link1">
+        <visual>
+            <origin xyz="0 0 ${link1_length/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${link1_side} ${link1_side} ${link1_length}" />
+            </geometry>
+            <material name="White">
+                <color rgba="1.0 1.0 1.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="joint1" type="revolute">
+        <parent link="base_link" />
+        <child link="link1" />
+        <origin xyz="0 0 ${base_height}" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+        <limit lower="-${pi/2}" upper="${pi/2}" effort="10" velocity="0.1" />
+    </joint>
+
+    <link name="link2">
+        <visual>
+            <origin xyz="0 0 ${link2_length/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${link2_side} ${link2_side} ${link2_length}" />
+            </geometry>
+            <material name="White">
+                <color rgba="1.0 1.0 1.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="joint2" type="revolute">
+        <parent link="link1" />
+        <child link="link2" />
+        <origin xyz="0 0 ${link1_length}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="0" upper="${pi/3}" effort="10" velocity="0.1" />
+    </joint>
+
+    <link name="link3">
+        <visual>
+            <origin xyz="${link3_length/2} 0 0" rpy="0 ${pi/2} 0" />
+            <geometry>
+                <box size="${link3_side} ${link3_side} ${link3_length}" />
+            </geometry>
+            <material name="White">
+                <color rgba="1.0 1.0 1.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="joint3" type="revolute">
+        <parent link="link2" />
+        <child link="link3" />
+        <origin xyz="0 0 ${link2_length}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="${-55/180*pi}" upper="${70/180*pi}" effort="10" velocity="0.1" />
+    </joint>
+
+    <link name="link_mimic_1" />
+
+    <joint name="joint_mimic_1" type="revolute">
+        <parent link="link3" />
+        <child link="link_mimic_1" />
+        <origin xyz="${link3_length} 0 0" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="${-pi}" upper="${pi}" effort="10" velocity="0.1" />
+        <mimic joint="joint2" multiplier="-1" />
+    </joint>
+
+    <link name="link_mimic_2">
+        <visual>
+            <origin xyz="${link_mimic_length/2} 0 0" rpy="0 ${pi/2} 0" />
+            <geometry>
+                <box size="${link_mimic_side} ${link_mimic_side} ${link_mimic_length}" />
+            </geometry>
+            <material name="White">
+                <color rgba="1.0 1.0 1.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="joint_mimic_2" type="revolute">
+        <parent link="link_mimic_1" />
+        <child link="link_mimic_2" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+        <limit lower="${-pi}" upper="${pi}" effort="10" velocity="0.1" />
+        <mimic joint="joint3" multiplier="-1" />
+    </joint>
+
+    <link name="link4">
+        <visual>
+            <origin xyz="0 0 ${-link4_length/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${link4_side} ${link4_side} ${link4_length}" />
+            </geometry>
+            <material name="Blue">
+                <color rgba="0.0 0.0 1.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="joint4" type="revolute">
+        <parent link="link_mimic_2" />
+        <child link="link4" />
+        <origin xyz="${link_mimic_length} 0 0" rpy="0 0 0" />
+        <axis xyz="0 0 1" />
+        <limit lower="${-150/180*pi}" upper="${150/180*pi}" effort="10" velocity="0.1" />
+    </joint>
+
+    <link name="link_ee">
+        <visual>
+            <origin xyz="0 0 ${-linkee_length/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${linkee_side} ${linkee_side} ${linkee_length}" />
+            </geometry>
+            <material name="Red">
+                <color rgba="1.0 0.0 0.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="joint_ee" type="fixed">
+        <parent link="link4" />
+        <child link="link_ee" />
+        <origin xyz="0 0 ${-link4_length}" rpy="0 0 0" />
+    </joint>
+
+</robot>
