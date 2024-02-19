@@ -16,8 +16,7 @@ class LIMITS:
 
 class DobotClient:
     """
-    Implementation of the Dobot Magician client based on sockets.
-    A custom protocol is used (see dobot_server.py for details)
+    Python API for Dobot Magician.
     """
 
     def __init__(self):
@@ -33,19 +32,31 @@ class DobotClient:
             except:
                 pass
 
-    # Start homing procedure
     def start_homing(self):
+        """
+        Start homing procedure
+        Input: none
+        Output: none
+        """
         self._sock.send(struct.pack("<1B4f", 0, 0.0, 0.0, 0.0, 0.0))
 
-    # Get joint state
     def get_joint_state(self):
+        """
+        Get joint state
+        Input: none
+        Output: tuple (4 joint angles in degrees)
+        """
         self._sock.send(struct.pack("<1B4f", 1, 0.0, 0.0, 0.0, 0.0))
         data = self._sock.recv(struct.calcsize("<4f"))
         response = struct.unpack("<4f", data)
         return response
 
-    # Check if point-to-point (PTP) goal for joints is valid
     def is_goal_valid(self, j1, j2, j3, j4):
+        """
+        Check if point-to-point (PTP) goal for joints is valid
+        Input: 4 floats (goal joint angles in degrees)
+        Output: boolean (True if goal is valid)
+        """
         self._sock.send(struct.pack("<1B4f", 2, j1, j2, j3, j4))
         data = self._sock.recv(struct.calcsize("<1B"))
         (response,) = struct.unpack("<1B", data)
@@ -53,10 +64,21 @@ class DobotClient:
 
     # Set point-to-point (PTP) goal for joints
     def set_joint_ptp(self, j1, j2, j3, j4):
+        """
+        Set point-to-point (PTP) goal for joints
+        Input: 4 floats (goal joint angles in degrees)
+        Output: none
+        Note: goal will be clipped to joint limits 
+        """
         self._sock.send(struct.pack("<1B4f", 3, j1, j2, j3, j4))
 
     # Set suction cup on/off
     def set_suction_cup(self, enable):
+        """
+        Set suction cup on/off
+        Input: boolean (True to set suction cup on)
+        Output: none
+        """
         if enable:
             self._sock.send(struct.pack("<1B4f", 4, 0.0, 0.0, 0.0, 0.0))
         else:
@@ -64,4 +86,9 @@ class DobotClient:
 
     # Stop current action
     def stop_current_action(self):
+        """
+        Stop current action immediately
+        Input: none
+        Output: none
+        """
         self._sock.send(struct.pack("<1B4f", 6, 0.0, 0.0, 0.0, 0.0))
