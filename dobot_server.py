@@ -4,13 +4,13 @@ Custom protocol:
     Start homing procedure
         command: 0, 0., 0., 0., 0.
         response: none
-    Get joints state
+    Get joint state
         command: 1, 0., 0., 0., 0.
         response: j1, j2, j3, j4
     Check if point-to-point goal for joints is valid
         command: 2, j1, j2, j3, j4
         response: bool (True if goal is valid)
-    Set point-to-point goal for joints
+    Set point-to-point goal for joints (goal will be clipped to joint limits)
         command: 3, j1, j2, j3, j4
         response: none
     Set suction cup on
@@ -18,6 +18,9 @@ Custom protocol:
         response: none
     Set suction cup off
         command: 5, 0., 0., 0., 0.
+        response: none
+    Stop current action
+        command: 6, 0., 0., 0., 0.
         response: none
 """
 import selectors
@@ -46,17 +49,19 @@ def read(conn, mask):
         if id == 0:
             dobot.start_homing()
         elif id == 1:
-            response = dobot.get_joints()
+            response = dobot.get_joint_state()
             conn.send(struct.pack("<4f", *response))
         elif id == 2:
             is_goal_valid = dobot.is_goal_valid(j1, j2, j3, j4)
             conn.send(struct.pack("<1B", is_goal_valid))
         elif id == 3:
-            dobot.set_ptp(j1, j2, j3, j4)
+            dobot.set_joint_ptp(j1, j2, j3, j4)
         elif id == 4:
             dobot.set_suction_cup(True)
         elif id == 5:
             dobot.set_suction_cup(False)
+        elif id == 6:
+            dobot.stop_current_action()
     else:
         sel.unregister(conn)
         conn.close()
@@ -78,3 +83,4 @@ while True:
     for key, mask in events:
         callback = key.data
         callback(key.fileobj, mask)
+
